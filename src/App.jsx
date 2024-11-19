@@ -1,7 +1,55 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 
 const App = () => {
+  const [formData, setFormData] = useState({
+    proceso: "",
+    fecha: "",
+    proceso2: "",
+    descripcion: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Validación simple
+    if (!formData.proceso || !formData.fecha || !formData.descripcion) {
+      alert("Por favor completa todos los campos requeridos");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/defectos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert("Defecto registrado correctamente");
+        setFormData({
+          proceso: "",
+          fecha: "",
+          proceso2: "",
+          descripcion: "",
+        });
+      } else {
+        console.error("Error al enviar los datos al backend");
+        alert("Hubo un error al registrar el defecto");
+      }
+    } catch (error) {
+      console.error("Error de conexión:", error);
+      alert("No se pudo conectar con el servidor");
+    }
+  };
+
   return (
     <div className="contenedor">
       {/* Navbar */}
@@ -16,14 +64,20 @@ const App = () => {
 
       {/* Formulario de registro */}
       <section>
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="title-form">
             <h2>Registro de Defectos</h2>
           </div>
           <fieldset>
             <legend>Datos</legend>
             <label htmlFor="proceso">Proceso que encontró el defecto:</label>
-            <select name="proceso" id="proceso" required>
+            <select
+              name="proceso"
+              id="proceso"
+              value={formData.proceso}
+              onChange={handleInputChange}
+              required
+            >
               <option value="">--Proceso que encontró el defecto--</option>
               <option value="prueba-electrica">Prueba Eléctrica</option>
               <option value="inspeccion">Inspección</option>
@@ -31,10 +85,22 @@ const App = () => {
             </select>
 
             <label htmlFor="fecha">Fecha:</label>
-            <input type="date" name="fecha" id="fecha" required />
+            <input
+              type="date"
+              name="fecha"
+              id="fecha"
+              value={formData.fecha}
+              onChange={handleInputChange}
+              required
+            />
 
             <label htmlFor="proceso2">Proceso:</label>
-            <select name="proceso2" id="proceso2">
+            <select
+              name="proceso2"
+              id="proceso2"
+              value={formData.proceso2}
+              onChange={handleInputChange}
+            >
               <option value="">--Proceso--</option>
               <option value="alta">FOAM</option>
               <option value="media">Prepa</option>
@@ -42,7 +108,15 @@ const App = () => {
             </select>
 
             <label htmlFor="descripcion">Descripción del Defecto:</label>
-            <textarea name="descripcion" id="descripcion" cols="30" rows="10" required></textarea>
+            <textarea
+              name="descripcion"
+              id="descripcion"
+              cols="30"
+              rows="10"
+              value={formData.descripcion}
+              onChange={handleInputChange}
+              required
+            ></textarea>
 
             <button type="submit">Enviar</button>
           </fieldset>
